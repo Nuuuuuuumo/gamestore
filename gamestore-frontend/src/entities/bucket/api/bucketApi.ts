@@ -1,6 +1,6 @@
-import {baseApi} from "@/shared/api/baseAPI";
-import {Bucket, DeleteGameFromBucketDto} from "@/entities/bucket/model/types";
+import type {Bucket, DeleteGameFromBucketDto} from "@/entities/bucket/model/types";
 
+import {baseApi} from "@/shared/api/baseAPI";
 
 export const bucketApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -17,6 +17,12 @@ export const bucketApi = baseApi.injectEndpoints({
         body: {gameId},
       }),
     }),
+    clearBucket: build.query<Bucket, void>({
+      query: () => ({
+        url: "bucket/clearBucket",
+        method: "POST",
+      }),
+    }),
     deleteGameFromBucket: build.mutation<Bucket, DeleteGameFromBucketDto>({
       query: (body) => ({
         url: "bucket/deleteGameFromBucket",
@@ -27,4 +33,10 @@ export const bucketApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {useGetUserBucketQuery, useAddGameToBucketMutation, useDeleteGameFromBucketMutation} = bucketApi;
+export const {
+  useGetUserBucketQuery,
+  useLazyGetUserBucketQuery,
+  useAddGameToBucketMutation,
+  useDeleteGameFromBucketMutation,
+  useLazyClearBucketQuery,
+} = bucketApi;

@@ -1,7 +1,7 @@
-import {createSlice} from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-import {sessionApi} from "@/entities/authentification/api/authApi";
-import {type Session} from "@/entities/authentification/model/types";
+import { sessionApi } from "@/entities/authentification/api/authApi";
+import { type Session } from "@/entities/authentification/model/types";
 
 type SessionSliceState =
   | {
@@ -27,27 +27,32 @@ export const sessionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addMatcher(sessionApi.endpoints.me.matchFulfilled, (state: SessionSliceState, {payload}) => {
+    builder.addMatcher(sessionApi.endpoints.me.matchFulfilled, (state: SessionSliceState, { payload }) => {
       state.isAuthorized = Boolean(payload);
       if (state.isAuthorized) {
         state.data = payload;
       }
     });
-    builder.addMatcher(sessionApi.endpoints.login.matchFulfilled, (state: SessionSliceState, {payload}) => {
+    builder.addMatcher(sessionApi.endpoints.login.matchFulfilled, (state: SessionSliceState, { payload }) => {
       state.isAuthorized = Boolean(payload);
       if (state.isAuthorized) {
         state.data = payload;
       }
+    });
+    builder.addMatcher(sessionApi.endpoints.registration.matchFulfilled, (state: SessionSliceState, { payload }) => {
+      state.isAuthorized = Boolean(payload);
+      if (state.isAuthorized) {
+        state.data = payload;
+      }
+    });
+    builder.addMatcher(sessionApi.endpoints.logout.matchFulfilled, (state: SessionSliceState) => {
+      state.data = undefined;
     });
   },
 });
 
-export const selectUserData = (state: RootState) => {
-  return state.session?.data;
-};
+export const selectUserData = (state: RootState) => state.session?.data;
 
-export const selectIsAuth = (state: RootState) => {
-  return state.session?.isAuthorized;
-};
+export const selectIsAuth = (state: RootState) => state.session?.isAuthorized;
 
-export const {clearSessionData} = sessionSlice.actions;
+export const { clearSessionData } = sessionSlice.actions;

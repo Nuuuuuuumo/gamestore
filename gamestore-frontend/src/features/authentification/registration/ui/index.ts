@@ -1,1 +1,1 @@
-export {RegistrationForm} from "./RegistrationForm/RegistrationForm";
+export { RegistrationForm } from "./RegistrationForm/RegistrationForm";

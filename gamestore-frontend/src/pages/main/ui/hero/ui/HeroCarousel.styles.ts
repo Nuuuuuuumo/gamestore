@@ -1,4 +1,4 @@
-import {makeStyles} from "tss-react/mui";
+import { makeStyles } from "tss-react/mui";
 
 export const useStyles = makeStyles()((theme) => {
   const maxWidthCaclsSmValue = theme.spacing(3).split("px")[0];
@@ -39,5 +39,4 @@ export const useStyles = makeStyles()((theme) => {
     },
   };
 });
-
 

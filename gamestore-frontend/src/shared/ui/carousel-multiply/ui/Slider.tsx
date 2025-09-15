@@ -1,21 +1,20 @@
 import "swiper/css";
-import {type ReactNode, useCallback} from "react";
-import {Swiper, SwiperProps, SwiperSlide} from "swiper/react";
-
-import clsx from "clsx";
-
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
+import clsx from "clsx";
+import {type ReactNode, useCallback} from "react";
 import {Navigation} from "swiper";
+
+import {Swiper, SwiperSlide} from "swiper/react";
 
 import useStyles from "./slider.styles";
 
+import type {SwiperProps} from "swiper/react";
 import type {SwiperOptions} from "swiper/types/swiper-options";
+
 
 import {useDomRefWithSetter} from "@/shared/ui/carousel-multiply/lib";
 import {SliderButton} from "@/shared/ui/carousel-multiply/ui/sliderButton/SliderButton";
-
 
 export interface CarouselMultiplyProps<T> extends SwiperProps {
   items: T[] | undefined;
@@ -43,7 +42,7 @@ export function CarouselMultiply<T>({
   const {classes} = useStyles();
   const [nextEl, nextElRef] = useDomRefWithSetter<HTMLButtonElement>();
   const [prevEl, prevElRef] = useDomRefWithSetter<HTMLButtonElement>();
-
+  
   const renderItems = useCallback(
     (_items: typeof items) =>
       _items?.map((item, idx) => (
@@ -53,7 +52,7 @@ export function CarouselMultiply<T>({
       )),
     [slideClassName, renderItem],
   );
-
+  
   const swiperOptions: SwiperOptions = {
     slidesPerView: "auto",
     spaceBetween: 8,
@@ -67,9 +66,9 @@ export function CarouselMultiply<T>({
     },
     ...options,
   };
-
+  
   const DEFAULT_MODULES = [Navigation];
-
+  
   return (
     <Swiper
       className={clsx(classes.slider, className)}

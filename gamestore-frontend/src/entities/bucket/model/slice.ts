@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-import {Bucket} from "@/entities/bucket/model/types";
+import type {Bucket} from "@/entities/bucket/model/types";
+
 import {bucketApi} from "@/entities/bucket/api/bucketApi";
 
 type BucketSliceState = {
@@ -29,12 +30,13 @@ export const bucketSlice = createSlice({
     builder.addMatcher(bucketApi.endpoints.deleteGameFromBucket.matchFulfilled, (state: BucketSliceState, {payload}) => {
       state.data = payload;
     });
+    builder.addMatcher(bucketApi.endpoints.clearBucket.matchFulfilled, (state: BucketSliceState, {payload}) => {
+      state.data = payload;
+    });
   },
 });
 
-export const selectUserBucket = (state: RootState) => {
-  return state.bucket.data;
-};
-
+export const selectUserBucket = (state: RootState) => state.bucket.data;
+export const selectUserBucketGames = (state: RootState) => state.bucket.data?.games;
 
 export const {clearBucketData} = bucketSlice.actions;

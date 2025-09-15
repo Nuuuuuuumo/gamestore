@@ -1,44 +1,60 @@
 import {Avatar, IconButton, Menu, MenuItem, Tooltip} from "@mui/material";
-import {MouseEvent, useState} from "react";
-
 import {enqueueSnackbar} from "notistack";
 
-import {selectUserData} from "@/entities/authentification";
-import {useAppDispatch, useAppSelector} from "@/shared/model/hooks";
+import {useState} from "react";
+
+import {useNavigate} from "react-router-dom";
+
+import {useSelector} from "react-redux";
+
+import {useStyles} from "./ProfileButton.styles";
+
+import type {MouseEvent} from "react";
+
+
+
 import {useLogoutMutation} from "@/entities/authentification/api/authApi";
-import {clearSessionData} from "@/entities/authentification/model/slice";
+import {useAppDispatch} from "@/shared/model/hooks";
 import {RedirectLink} from "@/shared/ui";
 
+
 export const ProfileButton = () => {
+  const {classes} = useStyles();
   const [logoutMutation] = useLogoutMutation();
-  const userData = useAppSelector(selectUserData);
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const userData = useSelector((state: RootState) => state.session.data);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
-
+  
   const handleCloseUserMenu = async () => {
     setAnchorElUser(null);
   };
-
+  
   const handleLogout = async () => {
-    setAnchorElUser(null);
-    dispatch(clearSessionData());
     await logoutMutation().unwrap().then((payload) => {
       enqueueSnackbar(payload?.message, {variant: "success"});
+      
+    }).finally(() => {
+      dispatch({type: "logout"});
+      setAnchorElUser(null);
+      navigate("/");
     });
   };
-
+  
   return (
     <>
       <Tooltip title="Open settings">
         <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-          <Avatar alt="Remy Sharp" src={userData?.avatarURL}/>
+          <Avatar alt="Remy Sharp" style={{borderRadius: "25%", border: "0.5px solid #292929"}}
+            src={userData?.avatarURL}/>
         </IconButton>
       </Tooltip>
       <Menu
-        sx={{mt: "45px"}}
+        className={classes.menu}
+        classes={{paper: classes.paper}}
         id="menu-appbar"
         anchorEl={anchorElUser}
         anchorOrigin={{

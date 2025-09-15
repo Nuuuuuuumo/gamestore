@@ -41,6 +41,17 @@ export class AuthController {
     return this.authService.loginUser(loginDto, res);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Get few users (excluding requester).',
+  })
+  @Get('users/few')
+  async getFew(@Req() req: Request, @Res() res: Response) {
+    const users = await this.authService.getFewUsers(req.user.id, 5);
+    return res.status(200).send(users);
+  }
+
   @ApiResponse({ status: 200, description: 'Verify User' })
   @UseGuards(JwtGuard)
   @Post('/me')

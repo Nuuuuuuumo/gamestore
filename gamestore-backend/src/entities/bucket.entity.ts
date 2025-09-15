@@ -22,7 +22,7 @@ export class Bucket {
   user: User;
 
   @ManyToMany(() => Game, (game) => game.bucket, {
-    cascade: ['insert', 'update'],
+    cascade: ['insert', 'update', 'remove'],
     nullable: true,
   })
   @JoinTable()

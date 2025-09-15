@@ -1,8 +1,11 @@
-import {ButtonHTMLAttributes, forwardRef} from "react";
 import {clsx} from "clsx";
 
+import {forwardRef} from "react";
+
 import useStyles from "./slider-button.styles";
- 
+
+import type {ButtonHTMLAttributes} from "react";
+
 interface SliderButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
@@ -14,4 +17,4 @@ export const SliderButton = forwardRef<HTMLButtonElement, SliderButtonProps>(({c
       {children}
     </button>
   );
-});
+});  

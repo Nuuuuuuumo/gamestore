@@ -18,35 +18,45 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const response = context.getResponse();
     const request = context.getRequest();
-    let message = (exception as any).message;
-    let code = 'Bad Request';
-    let status;
 
-    switch (exception.constructor) {
-      case HttpException:
-        status = (exception as HttpException).getStatus();
-        break;
-      case QueryFailedError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as QueryFailedError).message;
-        code = (exception as any).code;
-        break;
-      case TypeORMError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as TypeORMError).message;
-        break;
-      case EntityNotFoundError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as EntityNotFoundError).message;
-        code = (exception as any).code;
-        break;
-      case CannotCreateEntityIdMapError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as CannotCreateEntityIdMapError).message;
-        code = (exception as any).code;
-        break;
-      default:
-        status = (exception as any).getStatus();
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    let message: string;
+    let code = 'Internal Server Error';
+
+    if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      const errorResponse = exception.getResponse();
+
+      if (typeof errorResponse === 'string') {
+        message = errorResponse;
+      } else if (
+        typeof errorResponse === 'object' &&
+        'message' in errorResponse
+      ) {
+        message = Array.isArray(errorResponse.message)
+          ? errorResponse.message.join(', ')
+          : String(errorResponse.message);
+      } else {
+        message = 'An error occurred';
+      }
+    } else if (exception instanceof QueryFailedError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = exception.message;
+      code = (exception as any).code;
+    } else if (exception instanceof TypeORMError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = exception.message;
+    } else if (exception instanceof EntityNotFoundError) {
+      status = HttpStatus.NOT_FOUND;
+      message = exception.message;
+    } else if (exception instanceof CannotCreateEntityIdMapError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = exception.message;
+      code = (exception as any).code;
+    } else if (exception instanceof Error) {
+      message = exception.message;
+    } else {
+      message = 'Unknown error occurred';
     }
 
     response.status(status).json({

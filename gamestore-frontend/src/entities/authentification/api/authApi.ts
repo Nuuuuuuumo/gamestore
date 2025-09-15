@@ -1,9 +1,9 @@
+import type {RequestLoginBody, Session} from "@/entities/authentification/model/types";
+import type {User} from "@/shared/api";
+
+import {mapSession} from "@/entities/authentification/lib/mapSession";
 import {baseApi} from "@/shared/api/baseAPI";
 import {AUTH_TAG} from "@/shared/api/tags";
-import {mapSession} from "@/entities/authentification/lib/mapSession";
-import {User} from "@/shared/api";
-import {RequestLoginBody, Session} from "@/entities/authentification/model/types";
-
 
 export const sessionApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -25,7 +25,7 @@ export const sessionApi = baseApi.injectEndpoints({
       invalidatesTags: [AUTH_TAG],
       transformResponse: (response: User): Session => mapSession(response),
     }),
-    me: build.query({
+    me: build.query<Session, void>({
       query: () => ({
         url: "auth/me",
         method: "POST",
@@ -38,7 +38,20 @@ export const sessionApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
+    getFewUsers: build.query<User[], void>({
+      query: () => ({
+        url: "auth/users/few",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const {useRegistrationMutation, useLoginMutation, useMeQuery, useLogoutMutation} = sessionApi;
+export const {
+  useRegistrationMutation,
+  useGetFewUsersQuery,
+  useLoginMutation,
+  useMeQuery,
+  useLazyMeQuery,
+  useLogoutMutation,
+} = sessionApi;

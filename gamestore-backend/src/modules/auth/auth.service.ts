@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -14,11 +14,15 @@ import { JWTService } from '../jwt/jwt.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegistrationDto } from './dtos/registration.dto';
 import { AwsService } from '../aws/aws.service';
+import { BucketService } from '../bucket/bucket.service';
+import { BucketRepository } from '../bucket/bucket.repository';
+import { Bucket } from '../../entities/bucket.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly bucketRepository: BucketRepository,
     private readonly awsService: AwsService,
     private readonly configService: ConfigService,
     private readonly jwtService: JWTService,
@@ -53,6 +57,7 @@ export class AuthService {
         password: hashedPassword,
       });
       const accessToken = await this.jwtService.generateTokens(newUser, res);
+      await this.bucketRepository.createBucket(newUser);
       return res.status(200).send({ ...newUser, accessToken });
     } catch (error) {
       if (error.code === '23505') {
@@ -60,8 +65,18 @@ export class AuthService {
           .status(500)
           .send({ message: 'There is already a user with this email.' });
       }
+
       return res.status(500).send({ message: error.message });
     }
+  }
+
+  async getFewUsers(currentUserId: string, limit = 5) {
+    return this.userRepository.find({
+      where: { id: Not(currentUserId) },
+      take: limit,
+      order: { createdAt: 'DESC' },
+      select: ['id', 'firstName', 'lastName', 'email', 'avatarURL'],
+    });
   }
 
   //LOGIN USER

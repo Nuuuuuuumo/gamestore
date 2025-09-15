@@ -1,9 +1,7 @@
-import {AddGameForm} from "@/features/game/addGame/ui/AddGameForm/AddGameForm";
+import { AddGameForm } from "@/features/game/addGame/ui/AddGameForm/AddGameForm";
 
-export const AddGamePage = () => {
-  return (
-    <>
-      <AddGameForm/>
-    </>
-  );
-};
+export const AddGamePage = () => (
+  <>
+    <AddGameForm/>
+  </>
+);

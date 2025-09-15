@@ -25,6 +25,13 @@ export type User = {
   avatarURL: string
 }
 
+export type Friendship = {
+  id: string
+  status: "pending" | "rejected" | "accepted"
+  userId: string
+  friendId: string
+};
+
 export type Genre = {
   id: string
   name?: string

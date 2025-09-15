@@ -1,15 +1,15 @@
-import {CircularProgress} from "@mui/material";
+import { CircularProgress } from "@mui/material";
 
-import {useStyles} from "./HeroCarousel.styles";
+import { useStyles } from "./HeroCarousel.styles";
 
-import {CarouselMultiply} from "@/shared/ui/carousel-multiply/ui/Slider";
-import {HeroSlide} from "@/pages/main/ui/hero/ui/slide/HeroSlide";
-import {useGetGamesQuery} from "@/entities/game";
+import { useGetGamesQuery } from "@/entities/game";
+import { HeroSlide } from "@/pages/main/ui/hero/ui/slide/HeroSlide";
+import { CarouselMultiply } from "@/shared/ui/carousel-multiply/ui/Slider";
 
 export const HeroCarousel = () => {
-  const {data, isLoading} = useGetGamesQuery();
+  const { data, isLoading } = useGetGamesQuery();
 
-  const {classes} = useStyles();
+  const { classes } = useStyles();
   if (isLoading) return <CircularProgress/>;
   return (
     <section className={classes.section}>

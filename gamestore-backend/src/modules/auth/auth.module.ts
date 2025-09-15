@@ -9,6 +9,8 @@ import { JWTService } from '../jwt/jwt.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { AwsService } from '../aws/aws.service';
+import { Bucket } from '../../entities/bucket.entity';
+import { BucketRepository } from '../bucket/bucket.repository';
 
 @Module({
   imports: [
@@ -24,9 +26,15 @@ import { AwsService } from '../aws/aws.service';
         };
       },
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Bucket]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JWTService, AwsService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JWTService,
+    AwsService,
+    BucketRepository,
+  ],
 })
 export class AuthModule {}

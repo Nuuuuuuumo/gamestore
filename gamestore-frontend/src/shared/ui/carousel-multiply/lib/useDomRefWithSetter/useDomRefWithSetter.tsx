@@ -1,4 +1,4 @@
-import {type Ref, useEffect, useRef, useState} from "react";
+import { type Ref, useEffect, useRef, useState } from "react";
 
 export function useDomRefWithSetter<T extends HTMLElement>(): [T | null, Ref<T>] {
   const ref = useRef<T>(null);

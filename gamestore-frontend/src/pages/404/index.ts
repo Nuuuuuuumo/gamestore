@@ -1,1 +1,1 @@
-export {ErrorPage} from "./ui/404";
+export { ErrorPage } from "./ui/404";

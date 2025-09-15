@@ -1,1 +1,1 @@
-export {useDomRefWithSetter} from "./useDomRefWithSetter/useDomRefWithSetter";
+export { useDomRefWithSetter } from "./useDomRefWithSetter/useDomRefWithSetter";

@@ -1,11 +1,10 @@
-import {Box} from "@mui/material";
+import { Box } from "@mui/material";
 
-import {useStyles} from "@/pages/registration/ui/registrationPage.styles";
-import {RegistrationForm} from "@/features/authentification/registration";
-
+import { RegistrationForm } from "@/features/authentification/registration";
+import { useStyles } from "@/pages/registration/ui/registrationPage.styles";
 
 export const RegistrationPage = () => {
-  const {classes} = useStyles();
+  const { classes } = useStyles();
 
   return (
     <Box className={classes.rootWrapper}>

@@ -21,7 +21,7 @@ export class JWTService extends JwtService {
         },
       };
       const accessToken = this.sign(payload, {
-        expiresIn: '1m',
+        expiresIn: '20m',
         secret: this.configService.get('SECRET_KEY'),
       });
 

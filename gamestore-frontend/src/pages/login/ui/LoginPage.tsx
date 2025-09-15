@@ -5,7 +5,8 @@ import {useStyles} from "@/pages/login/ui/loginPage.styles";
 
 export const LoginPage = () => {
   const {classes} = useStyles();
-
+  
+  
   return (
     <Box className={classes.rootWrapper}>
       <LoginForm/>

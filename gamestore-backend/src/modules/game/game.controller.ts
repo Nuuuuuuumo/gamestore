@@ -14,14 +14,22 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GameService } from './game.service';
-import { Response, Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtGuard } from '../../common/guards/jwt-auth.guard';
-import { GiftGameDto } from './dtos/giftGame.dto';
+import { GiftGamesDto } from './dtos/giftGames.dto';
 import { QueryParamsTypes } from './types/QueryParams.types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AddGameDto } from './dtos/addGame.dto';
+import { BuyGameDto } from './dtos/buyGame.dto';
 
 @ApiTags('Game')
 @Controller('games')
@@ -41,13 +49,26 @@ export class GameController {
     return this.gameService.addGame(res, addGameDto, image);
   }
 
+  @ApiOperation({ summary: 'Buy one or multiple games' })
+  @ApiBody({ type: BuyGameDto })
+  @ApiResponse({ status: 200, description: 'Games purchased successfully' })
+  @ApiResponse({
+    status: 400,
+    description: 'User already owns all selected games',
+  })
+  @ApiResponse({ status: 404, description: 'Games or user not found' })
   @UseGuards(JwtGuard)
-  @Post('/giftGame')
-  giftGame(@Body() giftGameDto: GiftGameDto, @Res() res: Response) {
-    return this.gameService.giftGame(giftGameDto, res);
+  @Post('buy')
+  buyGames(@Req() req: Request, @Body() dto: BuyGameDto) {
+    return this.gameService.buyGames(dto, req.user.id);
   }
 
   @UseGuards(JwtGuard)
+  @Post('giftGames')
+  giftGames(@Req() req: Request, @Body() giftGamesDto: GiftGamesDto) {
+    return this.gameService.giftGames(giftGamesDto, req.user.id);
+  }
+
   @Get('game/:id')
   getOne(@Param('id') id: string, @Res() res: Response) {
     return this.gameService.getGameById(id, res);
@@ -88,7 +109,6 @@ export class GameController {
     return this.gameService.getFilteredGames(res, queryParams);
   }
 
-  @UseGuards(JwtGuard)
   @Get('/getGenresAndPlatforms')
   getGenresAndPlatforms(@Res() res: Response) {
     return this.gameService.getGenresAndPlatforms(res);

@@ -7,17 +7,17 @@ import path from "path"
 
 export default defineConfig({
   plugins: [
-      react(),
+    react(),
     {
       ...eslint(
-          {
-            include: "src/**/*.+(js|jxs|ts|tsx)",
-          },
+        {
+          include: "src/**/*.+(js|jxs|ts|tsx)",
+        },
       ),
       enforce: "pre",
     },
-
-    visualizer({ gzipSize: true, open: true }) as PluginOption,
+    
+    visualizer({gzipSize: true, open: true}) as PluginOption,
   ],
   resolve: {
     alias: [{find: '@', replacement: path.resolve(__dirname, 'src')}],

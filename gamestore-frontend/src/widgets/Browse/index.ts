@@ -1,1 +1,1 @@
-export {Browse} from "./ui/Browse";
+export { Browse } from "./ui/Browse";

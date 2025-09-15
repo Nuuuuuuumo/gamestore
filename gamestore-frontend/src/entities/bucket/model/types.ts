@@ -1,4 +1,4 @@
-import {Game} from "@/shared/api";
+import type { Game } from "@/shared/api";
 
 export type Bucket = {
   id: string

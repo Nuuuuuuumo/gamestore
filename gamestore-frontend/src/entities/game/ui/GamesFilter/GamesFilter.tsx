@@ -1,11 +1,21 @@
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  TextField,
+} from "@mui/material";
 import React from "react";
-
-import {Box, Chip, CircularProgress, FormControl, InputLabel, MenuItem, OutlinedInput, Select, TextField} from "@mui/material";
 
 import {useStyles} from "./filter.styles";
 
+
 import {useGetGenresAndPlatformsQuery} from "@/entities/game/api/gameAPi";
-import {FilterState} from "@/widgets/Browse/ui/Browse";
+import {FilterState} from "@/entities/game/model/types";
 
 type GamesFilterProps = {
   filters: FilterState;
@@ -28,7 +38,7 @@ export const GamesFilter = ({filters, onChangeFilters}: GamesFilterProps) => {
   const handleFilterChange = (filterName: string, value: unknown) => {
     onChangeFilters({...filters, [filterName]: value});
   };
-
+  
   if (isFetching || isLoading) return <CircularProgress/>;
   if (!data && (!isFetching || !isLoading)) return <>Error</>;
   return (
@@ -103,7 +113,7 @@ export const GamesFilter = ({filters, onChangeFilters}: GamesFilterProps) => {
           ))}
         </Select>
       </FormControl>
-
+    
     </Box>
   );
 };

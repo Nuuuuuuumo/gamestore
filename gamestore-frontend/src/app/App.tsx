@@ -1,7 +1,5 @@
-import {BaseLayout} from "@/app/layouts";
+import { BaseLayout } from "@/app/layouts";
 
-export const App = () => {
-  return (
-    <BaseLayout/>
-  );
-};
+export const App = () => (
+  <BaseLayout/>
+);

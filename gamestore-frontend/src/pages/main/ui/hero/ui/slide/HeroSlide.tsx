@@ -1,11 +1,11 @@
-import {Link} from "react-router-dom";
-
 import {Box, Typography} from "@mui/material";
+import {Link} from "react-router-dom";
 
 import {useStyles} from "./HeroSlide.styles";
 
+import type {Game} from "@/shared/api";
+
 import {MovieRating} from "@/shared/ui/movie-rating";
-import {Game} from "@/shared/api";
 
 interface SlideProps {
   item: Game;
@@ -14,7 +14,7 @@ interface SlideProps {
 export const HeroSlide = ({item}: SlideProps) => {
   const {classes} = useStyles();
   const {id, title, rating, imageUrl} = item;
-
+  
   return (
     <Box className={classes.item}>
       <Link to={`/games/${id}`} className={classes.link}/>

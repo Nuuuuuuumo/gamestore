@@ -1,1 +1,1 @@
-export {RedirectLink} from "./RedirectLink";
+export { RedirectLink } from "./RedirectLink";

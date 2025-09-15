@@ -1,1 +1,1 @@
-export {CarouselMultiply} from "./ui/Slider";
+export { CarouselMultiply } from "./ui/Slider";

@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
+import { readableStreamLikeToAsyncGenerator } from 'rxjs/internal/util/isReadableStreamLike';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -37,7 +38,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!payload) {
       return null;
     }
-    const user = await this.userRepository.findOne({ where: payload.sub });
+    const user = await this.userRepository.findOne({
+      where: { id: payload.sub.id },
+      relations: ['games'],
+    });
     if (!user) return null;
     return user;
   }
