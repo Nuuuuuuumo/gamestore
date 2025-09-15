@@ -1,103 +1,98 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { Game } from '../../entities/game.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { AddGameDto } from './dtos/addGame.dto';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Response } from 'express';
-import { GiftGameDto } from './dtos/giftGame.dto';
-import { User } from '../../entities/user.entity';
-import {
-  classToClassFromExist,
-  classToPlain,
-  classToPlainFromExist,
-} from 'class-transformer';
-import { GameDto } from './dtos/game.dto';
+import { AddGameDto } from './dtos/addGame.dto';
+import { GiftGamesDto } from './dtos/giftGames.dto';
+import { QueryParamsTypes } from './types/QueryParams.types';
+import { AwsService } from '../aws/aws.service';
+import { GameRepository } from './game.repository';
+import { Genre } from '../../entities/genre.entity';
+import { Platform } from '../../entities/platform.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { classToPlainFromExist } from 'class-transformer';
+import { User } from 'src/entities/user.entity';
+import { BuyGameDto } from './dtos/buyGame.dto';
 
 @Injectable()
 export class GameService {
   constructor(
-    @InjectRepository(Game) private readonly gameRepository: Repository<Game>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private dataSource: DataSource,
+    private readonly gameRepository: GameRepository,
+    @InjectRepository(Genre)
+    private readonly genreRepository: Repository<Genre>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @Inject(AwsService)
+    private readonly awsService: AwsService,
+    @InjectRepository(Platform)
+    private readonly platformRepository: Repository<Platform>,
   ) {}
 
-  async addGame(addGameDto: AddGameDto, res: Response) {
-    if (!addGameDto) {
-      return res
-        .status(500)
-        .send({ message: 'Please, enter data for create new game!' });
-    }
-    try {
-      const newGame = await this.gameRepository.save(addGameDto);
-      return res.status(200).send(newGame);
-    } catch (error) {
-      return res.status(500).send({ message: error.message });
-    }
+  async addGame(res: Response, dto: AddGameDto, image?: Express.Multer.File) {
+    const s3Response = await this.awsService.uploadImage(image);
+    const game = await this.gameRepository.createGame({
+      ...dto,
+      imageUrl: s3Response,
+    });
+    return res.status(HttpStatus.OK).send(game);
   }
 
-  async giftGame(giftGame: GiftGameDto, res: Response) {
-    if (!giftGame) {
-      return res
-        .status(500)
-        .send({ message: 'Please, enter data for gifting game!' });
-    }
-    try {
-      const { userId, gameId } = giftGame;
-      const game = await this.gameRepository.findOne({
-        where: { id: gameId },
-      });
-
-      if (!game) {
-        return res.status(500).send({ message: 'This game doesnt exist' });
-      }
-      const user = await this.userRepository.findOne({
-        where: { id: userId },
-      });
-      if (!user) {
-        return res.status(500).send({ message: 'This user doesnt exist' });
-      }
-      await this.dataSource
-        .createQueryBuilder()
-        .relation(User, 'games')
-        .of(user)
-        .add(game);
-      return res.status(200).send({
-        message: `Game gifted to user ${user.firstName} ${user.lastName} successfully`,
-      });
-    } catch (error) {
-      if (error.code === '23505') {
-        return res
-          .status(400)
-          .send({ message: 'Game is already owned by this user' });
-      }
-      console.error('Error adding game to user:', error);
-      return res.status(500).send({ message: 'Error adding game to user' });
-    }
+  async deleteGame(id: string, res: Response) {
+    await this.gameRepository.delete(id);
+    return res.status(HttpStatus.OK).json({ message: 'Successfully deleted' });
   }
+
+  async buyGames(dto: BuyGameDto, userId: string) {
+    // Find user with their owned games
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['games'],
+    });
+
+    // Perform the purchase
+    const result = await this.gameRepository.buyGames(dto, user);
+
+    return result;
+  }
+
+  async giftGames(dto: GiftGamesDto, userId: string) {
+    // Find recipient with their owned games
+    const receiver = await this.userRepository.findOne({
+      where: { id: dto.friendId },
+      relations: ['games'],
+    });
+
+    // Add sender's ID to the DTO
+    dto.senderId = userId;
+    // Perform the gifting
+    const result = await this.gameRepository.giftGames(dto, receiver);
+
+    return result;
+  }
+  async getGames(res: Response) {
+    const games = await this.gameRepository.find();
+    return res.status(HttpStatus.OK).send(games);
+  }
+
   async getGameById(id: string, res: Response) {
-    if (!id) {
-      return res.status(500).send({ message: 'Provide game id, please' });
-    }
-    const game = await this.gameRepository.findOne({
-      relations: ['usersOwned'],
-      where: { id },
-    });
-    if (!game) {
-      return res.status(500).send({ message: 'Incorrect id of game' });
-    }
-    return res.status(200).send(game);
+    const game = await this.gameRepository.getGameWithRelations(id);
+    return res.status(HttpStatus.OK).send(game);
   }
 
-  async getAllGames(res: Response) {
-    const games = await this.gameRepository.find({
-      relations: ['usersOwned'],
+  async getFilteredGames(res: Response, queryParams?: QueryParamsTypes) {
+    const games = await this.gameRepository.findFilteredGames(queryParams);
+    return res.status(HttpStatus.OK).send(games);
+  }
+
+  async getGenresAndPlatforms(res: Response) {
+    const genres = await this.genreRepository.find();
+    const platforms = await this.platformRepository.find();
+    return res.status(HttpStatus.OK).send({
+      genres: classToPlainFromExist<Genre[]>(genres, {
+        excludeExtraneousValues: true,
+      }),
+      platforms: classToPlainFromExist<Platform[]>(platforms, {
+        excludeExtraneousValues: true,
+      }),
     });
-    if (!games) {
-      return res.status(500).send({ message: 'Games didnt found' });
-    }
-    const mappedGames = classToPlainFromExist<Game[]>(games, {
-      excludeExtraneousValues: true,
-    }) as GameDto[];
-    return res.status(200).send(mappedGames);
   }
 }

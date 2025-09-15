@@ -1,23 +1,29 @@
 import { User } from '../../entities/user.entity';
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Request, Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { JWTService } from './jwt.service';
+import { JWTService } from '../jwt/jwt.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegistrationDto } from './dtos/registration.dto';
-import { TokenExpiredError } from 'jsonwebtoken';
+import { AwsService } from '../aws/aws.service';
+import { BucketService } from '../bucket/bucket.service';
+import { BucketRepository } from '../bucket/bucket.repository';
+import { Bucket } from '../../entities/bucket.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly bucketRepository: BucketRepository,
+    private readonly awsService: AwsService,
     private readonly configService: ConfigService,
     private readonly jwtService: JWTService,
   ) {}
@@ -25,8 +31,14 @@ export class AuthService {
   private secretKey: string = this.configService.get('SECRET_KEY');
 
   //REGISTER USER
-  async registerUser(registrationDto: RegistrationDto, res: Response) {
-    const { firstName, lastName, email, password } = registrationDto;
+  async registerUser(
+    dto: RegistrationDto,
+    avatarURL: Express.Multer.File,
+    res: Response,
+  ) {
+    const { firstName, lastName, email, password } = dto;
+    const s3Response = await this.awsService.uploadImage(avatarURL);
+    const newDto = { ...dto, avatarURL: s3Response };
     if (
       !firstName?.trim() ||
       !lastName?.trim() ||
@@ -41,10 +53,11 @@ export class AuthService {
       const hashSalt = await bcrypt.genSalt(7);
       const hashedPassword = await bcrypt.hash(password, hashSalt);
       const newUser = await this.userRepository.save({
-        ...registrationDto,
+        ...newDto,
         password: hashedPassword,
       });
       const accessToken = await this.jwtService.generateTokens(newUser, res);
+      await this.bucketRepository.createBucket(newUser);
       return res.status(200).send({ ...newUser, accessToken });
     } catch (error) {
       if (error.code === '23505') {
@@ -52,8 +65,18 @@ export class AuthService {
           .status(500)
           .send({ message: 'There is already a user with this email.' });
       }
+
       return res.status(500).send({ message: error.message });
     }
+  }
+
+  async getFewUsers(currentUserId: string, limit = 5) {
+    return this.userRepository.find({
+      where: { id: Not(currentUserId) },
+      take: limit,
+      order: { createdAt: 'DESC' },
+      select: ['id', 'firstName', 'lastName', 'email', 'avatarURL'],
+    });
   }
 
   //LOGIN USER
@@ -86,7 +109,9 @@ export class AuthService {
   async logoutUser(req: Request, res: Response) {
     res.clearCookie('refreshToken');
     res.clearCookie('accessToken');
-    return res.status(200).send('Successfully unauthorized');
+    return res
+      .status(HttpStatus.OK)
+      .send({ message: 'Successfully unauthorized' });
   }
 
   //REFRESH TOKEN

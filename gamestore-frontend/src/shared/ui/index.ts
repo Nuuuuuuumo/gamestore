@@ -1,1 +1,2 @@
-export {Layout} from "../ui/Layout/Layout";
+export { Layout } from "./layout/Layout";
+export { RedirectLink } from "./redirect-link";

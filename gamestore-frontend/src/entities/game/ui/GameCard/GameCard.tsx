@@ -1,26 +1,33 @@
-import {Link} from "react-router-dom";
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 
-import {Box, Typography} from "@mui/material";
+import { useStyles } from "./gameCard.styles";
 
-import {Game} from "@/entities/game/model/types";
+import type { Game } from "@/shared/api";
+
+import { RedirectLink } from "@/shared/ui";
 
 type Props = {
   game: Game
 }
 
 export const GameCard = (props: Props) => {
-  const { id, title, imageUrl, genre, price } = props.game;
-
-
+  const { classes } = useStyles();
+  const { game } = props;
+  
   return (
-    <Link to={`/game/${id}`}>
-      <img src={imageUrl}/>
-      <Box>
-        <Typography variant="h1">{title}</Typography>
-        <Typography variant="h3">{genre}</Typography>
-        <Typography variant="h5">{price} $</Typography>
-      </Box>
-
-    </Link>
+    <RedirectLink redirectTo={`/games/${game.id}`}>
+      <Card key={game.id} className={classes.root}>
+        <CardMedia
+          component="img"
+          className={classes.image}
+          image={game.imageUrl}
+        />
+        <CardContent style={{ padding: 0 }}>
+          <Typography>{game.publisher}</Typography>
+          <Typography className={classes.title}>{game.title}</Typography>
+          <Typography className={classes.price}>${game.price}</Typography>
+        </CardContent>
+      </Card>
+    </RedirectLink>
   );
 };

@@ -1,36 +1,58 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-import {normalize, schema} from "normalizr";
+import { sessionApi } from "@/entities/authentification/api/authApi";
+import { type Session } from "@/entities/authentification/model/types";
 
-import {User} from "@/shared/api";
+type SessionSliceState =
+  | {
+  data: Session
+  isAuthorized: true
+}
+  | {
+  isAuthorized: false
+  data?: Session
+}
 
-export type QueryConfig = {
-  completed?: boolean;
-  userId?: number;
-};
-
-type NormalizedUsers = Record<number, User>;
-
-export const userSchema = new schema.Entity<User>("users");
-export const normalizeUser = (data: User) =>
-  normalize<User, { users: NormalizedUsers }>(data, userSchema);
-export const normalizeUsers = (data: User[]) =>
-  normalize<User, { users: NormalizedUsers }>(data, [userSchema]);
-
-export const initialState: {
-  data: NormalizedUsers;
-  queryConfig?: QueryConfig;
-} = {
-  data: {},
-  queryConfig: {},
+const initialState: SessionSliceState = {
+  isAuthorized: false,
 };
 
 export const sessionSlice = createSlice({
-  name: "user",
+  name: "session",
   initialState,
   reducers: {
-    setQueryConfig: (state, { payload }: PayloadAction<QueryConfig>) => {
-      state.queryConfig = payload;
+    clearSessionData: (state) => {
+      state.isAuthorized = false;
+      state.data = undefined;
     },
   },
+  extraReducers: (builder) => {
+    builder.addMatcher(sessionApi.endpoints.me.matchFulfilled, (state: SessionSliceState, { payload }) => {
+      state.isAuthorized = Boolean(payload);
+      if (state.isAuthorized) {
+        state.data = payload;
+      }
+    });
+    builder.addMatcher(sessionApi.endpoints.login.matchFulfilled, (state: SessionSliceState, { payload }) => {
+      state.isAuthorized = Boolean(payload);
+      if (state.isAuthorized) {
+        state.data = payload;
+      }
+    });
+    builder.addMatcher(sessionApi.endpoints.registration.matchFulfilled, (state: SessionSliceState, { payload }) => {
+      state.isAuthorized = Boolean(payload);
+      if (state.isAuthorized) {
+        state.data = payload;
+      }
+    });
+    builder.addMatcher(sessionApi.endpoints.logout.matchFulfilled, (state: SessionSliceState) => {
+      state.data = undefined;
+    });
+  },
 });
+
+export const selectUserData = (state: RootState) => state.session?.data;
+
+export const selectIsAuth = (state: RootState) => state.session?.isAuthorized;
+
+export const { clearSessionData } = sessionSlice.actions;

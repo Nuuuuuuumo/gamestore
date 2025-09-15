@@ -1,16 +1,19 @@
 import { User } from '../../../entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { Platform } from '../../../entities/platform.entity';
+import { Genre } from '../../../entities/genre.entity';
 
 export class GameDto {
   @ApiProperty({ description: 'The name of the game' })
   id: string;
 
   @ApiProperty({ description: 'The name of the game' })
-  title!: string;
+  title: string;
 
   @ApiProperty({ description: 'The genre of the game' })
-  genre!: string;
+  @Exclude()
+  genre: Genre[];
 
   @ApiProperty({
     description: 'The price of the game',
@@ -27,7 +30,8 @@ export class GameDto {
   usersOwned: User[];
 
   @ApiProperty({ description: 'The platform of the game' })
-  platform: string;
+  @Exclude()
+  platform: Platform[];
 
   @ApiProperty({ description: 'The publisher of the game' })
   publisher: string;
@@ -40,9 +44,6 @@ export class GameDto {
 
   @ApiProperty({ description: 'The imageUrl of the game' })
   imageUrl: string;
-
-  @ApiProperty({ description: 'The stockQuantity of the game' })
-  stockQuantity: number;
 
   @ApiProperty({ description: 'Is multiplayer support' })
   multiplayerSupport: boolean;

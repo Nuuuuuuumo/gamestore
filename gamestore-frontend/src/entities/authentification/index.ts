@@ -1,5 +1,5 @@
 export {
-  selectIsAuthorized,
-  userSlice,
+  selectUserData,
+  sessionSlice,
 } from "./model/slice";
-export {authApi} from "./api/authApi";
+export { sessionApi } from "./api/authApi";

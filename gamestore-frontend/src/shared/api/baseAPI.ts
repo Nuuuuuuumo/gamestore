@@ -1,9 +1,9 @@
-import {createApi} from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import {AUTH_TAG, baseQueryWithReAuth, GAME_TAG} from "@/shared/api";
+import { baseQueryWithReAuth, AUTH_TAG, GAME_TAG, FRIENDS_TAG } from "@/shared/api";
 
 export const baseApi = createApi({
-  tagTypes: [AUTH_TAG, GAME_TAG],
+  tagTypes: [AUTH_TAG, GAME_TAG, FRIENDS_TAG],
   reducerPath: "api",
   baseQuery: baseQueryWithReAuth,
   endpoints: () => ({}),

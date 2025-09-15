@@ -12,4 +12,7 @@ export class RegistrationDto {
 
   @ApiProperty({ type: String })
   password: string;
+
+  @ApiProperty({ type: String })
+  avatarURL: string;
 }

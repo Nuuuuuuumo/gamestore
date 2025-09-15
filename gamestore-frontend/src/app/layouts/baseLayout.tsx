@@ -1,10 +1,16 @@
 import React from "react";
 
-import {Layout} from "@/shared/ui/Layout/Layout";
+import type {ReactNode} from "react";
+
+import {Layout} from "@/shared/ui/layout/Layout";
 import {Header} from "@/widgets/Header";
 
-export const BaseLayout = () => {
-  return (
-    <Layout headerSlot={<Header />} />
-  );
-};
+
+type BaseLayoutProps = {
+  children?: ReactNode
+}
+export const BaseLayout = ({children}: BaseLayoutProps) => (
+  <Layout headerSlot={<Header/>}>
+    {children ? children : null}
+  </Layout>
+);

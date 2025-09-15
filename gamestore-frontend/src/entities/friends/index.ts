@@ -1,0 +1,1 @@
+export {useGetFriendsQuery, useLazyGetFriendsQuery} from "./api/friendsAPI";

@@ -1,0 +1,1 @@
+export { CarouselMultiply } from "./ui/Slider";
